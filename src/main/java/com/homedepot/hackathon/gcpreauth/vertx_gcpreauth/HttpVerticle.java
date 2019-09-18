@@ -12,7 +12,7 @@ public class HttpVerticle extends AbstractVerticle {
         HttpServer httpServer = vertx.createHttpServer();
 
         Router router = Router.router(vertx);
-        router.get("/").handler(this::indexHandler);
+        router.post("/").handler(this::indexHandler);
         httpServer.requestHandler(router).listen(8080, http -> {
             if (http.succeeded()) {
                 startPromise.complete();
