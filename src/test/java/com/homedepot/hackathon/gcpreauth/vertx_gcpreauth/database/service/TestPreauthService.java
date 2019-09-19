@@ -28,6 +28,7 @@ public class TestPreauthService {
     testContext.completeNow();
   }
 
+  @Test
   void test_insert(Vertx vertx, VertxTestContext testContext) throws Throwable {
     PreAuthService preAuthService = PreAuthService.createProxy(vertx, "gcpreauth");
     preAuthService.insertPreAuth("1234567890", 12.0, Timestamp.from(Instant.now()).toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(), Timestamp.from(Instant.now()).toString(), Timestamp.from(Instant.now()).toString(), Timestamp.from(Instant.now()).toString(), 'Y', result -> {

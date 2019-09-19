@@ -66,6 +66,7 @@ public class HttpVerticle extends AbstractVerticle {
                     insert -> {
                         if (insert.failed()) {
                             System.out.println("Insert failed!!!");
+                            System.err.println(insert.cause());
                         } else {
                             System.out.println("Insert success!!!");
                         }
