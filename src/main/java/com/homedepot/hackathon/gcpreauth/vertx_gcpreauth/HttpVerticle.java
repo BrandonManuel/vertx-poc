@@ -1,20 +1,18 @@
 package com.homedepot.hackathon.gcpreauth.vertx_gcpreauth;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.UUID;
+
 import com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.database.services.PreAuthService;
 import com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.models.GiftCard;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.security.Provider.Service;
-import java.util.UUID;
 
 public class HttpVerticle extends AbstractVerticle {
 
