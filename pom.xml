@@ -114,10 +114,30 @@
         <plugin>
             <artifactId>maven-compiler-plugin</artifactId>
             <version>${maven-compiler-plugin.version}</version>
+            <configuration>
+                <useIncremenntalCompilation>false</useIncremenntalCompilation>
+
+                <annotationProcessors>
+                    <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+                </annotationProcessors>
+                <generatedSourcesDirectory>${project.basedir}/src/main/generated</generatedSourcesDirectory>
+                <compilerArgs>
+                    <arg>-Acodegen.output=${project.basedir}/src/main</arg>
+                </compilerArgs>
+            </configuration>
         </plugin>
+        
+        
         <plugin>
             <artifactId>maven-clean-plugin</artifactId>
             <version>${maven-clean-plugin.version}</version>
+            <configuration>
+                <filesets>
+                    <fileset>
+                        <directory>${project.basedir}/src/main/generated</directory>
+                    </fileset>
+                </filesets>
+            </configuration>
         </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>

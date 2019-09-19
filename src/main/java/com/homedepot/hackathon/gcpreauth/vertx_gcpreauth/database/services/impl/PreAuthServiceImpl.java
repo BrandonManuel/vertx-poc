@@ -12,6 +12,8 @@ import io.vertx.ext.sql.SQLClient;
 import java.sql.Timestamp;
 import java.util.UUID;
 
+import com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.database.services.PreAuthService;
+
 public class PreAuthServiceImpl implements PreAuthService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PreAuthServiceImpl.class);
 
@@ -36,16 +38,16 @@ public class PreAuthServiceImpl implements PreAuthService {
 
     @Override
     @Fluent
-    public boolean insertPreAuth(String gcardNbr,
+    public PreAuthService insertPreAuth(String gcardNbr,
                           Double authAmt,
-                          Timestamp exprTs,
-                          UUID authId,
-                          UUID reqId,
-                          Timestamp lastUpdatedTs,
-                          Timestamp crtTs,
-                          Timestamp completeTs,
+                          String exprTs,
+                          String authId,
+                          String reqId,
+                          String lastUpdatedTs,
+                          String crtTs,
+                          String completeTs,
                           char postVoidFlag,
-                          Handler<AsyncResult<PreAuthService>> resultHandler){
+                          Handler<AsyncResult<Void>> resultHandler){
 
         JsonArray record = new JsonArray().add(gcardNbr).add(authAmt).add(exprTs.toString()).add(authId.toString()).add(reqId.toString()).add(lastUpdatedTs.toString()).add(crtTs.toString()).add(completeTs.toString()).add(postVoidFlag);
         sqlClient.updateWithParams("INSERT INTO GC_PREAUTH VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", record, create -> {
@@ -60,16 +62,16 @@ public class PreAuthServiceImpl implements PreAuthService {
             }
         });
 
-        return false;
+        return this;
     }
 
     @Override
-    public double getPendingBalance(String gcardNbr, Handler<AsyncResult<PreAuthService>> resultHandler) {
-        return 0;
+    public PreAuthService getPendingBalance(String gcardNbr, Handler<AsyncResult<Void>> resultHandler) {
+        return this;
     }
 
     @Override
-    public double getCurrentBalance(String gcardNbr, Handler<AsyncResult<PreAuthService>> resultHandler) {
-        return 0;
+    public PreAuthService getCurrentBalance(String gcardNbr, Handler<AsyncResult<Void>> resultHandler) {
+        return this;
     }
 }
