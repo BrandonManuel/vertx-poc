@@ -35,6 +35,7 @@ import io.vertx.serviceproxy.ProxyUtils;
 
 import com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.database.services.PreAuthService;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 /*
@@ -63,7 +64,7 @@ public class PreAuthServiceVertxEBProxy implements PreAuthService {
   }
 
   @Override
-  public  PreAuthService insertPreAuth(String gcardNbr, Double authAmt, String exprTs, String authId, String reqId, String lastUpdatedTs, String crtTs, String completeTs, char postVoidFlag, Handler<AsyncResult<Void>> resultHandler){
+  public  PreAuthService insertPreAuth(String gcardNbr, Double authAmt, String exprTs, String authId, String reqId, String lastUpdatedTs, String crtTs, String completeTs, char postVoidFlag, Handler<AsyncResult<JsonObject>> resultHandler){
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return this;
@@ -81,7 +82,7 @@ public class PreAuthServiceVertxEBProxy implements PreAuthService {
 
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "insertPreAuth");
-    _vertx.eventBus().<Void>send(_address, _json, _deliveryOptions, res -> {
+    _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
@@ -91,7 +92,7 @@ public class PreAuthServiceVertxEBProxy implements PreAuthService {
     return this;
   }
   @Override
-  public  PreAuthService getPendingBalance(String gcardNbr, Handler<AsyncResult<Void>> resultHandler){
+  public  PreAuthService getPendingBalance(String gcardNbr, Handler<AsyncResult<JsonObject>> resultHandler){
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return this;
@@ -101,7 +102,7 @@ public class PreAuthServiceVertxEBProxy implements PreAuthService {
 
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "getPendingBalance");
-    _vertx.eventBus().<Void>send(_address, _json, _deliveryOptions, res -> {
+    _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
@@ -111,7 +112,7 @@ public class PreAuthServiceVertxEBProxy implements PreAuthService {
     return this;
   }
   @Override
-  public  PreAuthService getCurrentBalance(String gcardNbr, Handler<AsyncResult<Void>> resultHandler){
+  public  PreAuthService getCurrentBalance(String gcardNbr, Handler<AsyncResult<JsonObject>> resultHandler){
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return this;
@@ -121,7 +122,7 @@ public class PreAuthServiceVertxEBProxy implements PreAuthService {
 
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "getCurrentBalance");
-    _vertx.eventBus().<Void>send(_address, _json, _deliveryOptions, res -> {
+    _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {

@@ -43,6 +43,7 @@ import io.vertx.serviceproxy.HelperUtils;
 
 import com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.database.services.PreAuthService;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 /*
