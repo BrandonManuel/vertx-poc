@@ -7,6 +7,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.SQLClient;
 
 import java.sql.Timestamp;
@@ -27,13 +28,13 @@ public interface PreAuthService {
                           String crtTs,
                           String completeTs,
                           char postVoidFlag,
-                          Handler<AsyncResult<Void>> resultHandler);
+                          Handler<AsyncResult<JsonObject>> resultHandler);
 
     @Fluent
-    PreAuthService getPendingBalance(String gcardNbr, Handler<AsyncResult<Void>> resultHandler);
+    PreAuthService getPendingBalance(String gcardNbr, Handler<AsyncResult<JsonObject>> resultHandler);
 
     @Fluent
-    PreAuthService getCurrentBalance(String gcardNbr, Handler<AsyncResult<Void>> resultHandler);
+    PreAuthService getCurrentBalance(String gcardNbr, Handler<AsyncResult<JsonObject>> resultHandler);
 
 
     @GenIgnore
