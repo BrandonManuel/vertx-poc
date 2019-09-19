@@ -5,9 +5,8 @@ import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+
 import io.vertx.ext.sql.SQLClient;
-import sun.plugin2.main.server.ResultHandler;
 
 import java.sql.Timestamp;
 import java.util.UUID;
