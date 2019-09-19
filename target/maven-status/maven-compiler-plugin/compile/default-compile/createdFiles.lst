@@ -1,7 +1,2 @@
 com/homedepot/hackathon/gcpreauth/vertx_gcpreauth/database/services/PreAuthServiceVertxEBProxy.class
 com/homedepot/hackathon/gcpreauth/vertx_gcpreauth/database/services/PreAuthServiceVertxProxyHandler.class
-com/homedepot/hackathon/gcpreauth/vertx_gcpreauth/MainVerticle.class
-com/homedepot/hackathon/gcpreauth/vertx_gcpreauth/database/services/PreAuthService.class
-com/homedepot/hackathon/gcpreauth/vertx_gcpreauth/database/services/package-info.class
-com/homedepot/hackathon/gcpreauth/vertx_gcpreauth/database/PostgresVerticle.class
-com/homedepot/hackathon/gcpreauth/vertx_gcpreauth/database/services/impl/PreAuthServiceImpl.class
