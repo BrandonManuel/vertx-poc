@@ -57,7 +57,9 @@ public class PreAuthServiceImpl implements PreAuthService {
                 if(LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Record inserted into GC_PREAUTH table");
                 }
-                resultHandler.handle(Future.succeededFuture());
+                JsonObject response = new JsonObject();
+                response.put("status", true);
+                resultHandler.handle(Future.succeededFuture(response));
             }
         });
 
