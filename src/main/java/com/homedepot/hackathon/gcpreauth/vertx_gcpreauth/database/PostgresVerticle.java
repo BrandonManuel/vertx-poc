@@ -4,6 +4,7 @@ import com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.database.services.PreAu
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.asyncsql.PostgreSQLClient;
 import io.vertx.ext.sql.SQLClient;
@@ -14,18 +15,16 @@ public class PostgresVerticle extends AbstractVerticle {
     private SQLClient sqlClient;
 
     @Override
-    public void start(Future<Void> startFuture) throws Exception {
+    public void start(Promise<Void> startPromise) {
         sqlClient = PostgreSQLClient.createShared(vertx, new JsonObject().put("host", "ld09245.homedepot.com")
                 .put("database", "postgres").put("username", "postgres").put("password", "cor3services!"));
-        PreAuthService.create(sqlClient, ready ->
-
-        {
-            if (ready.failed()) {
-                startFuture.failed();
+        PreAuthService.create(sqlClient, ready -> {
+            if(ready.failed()) {
+                startPromise.fail(ready.cause());
             } else {
-                ServiceBinder binder = new ServiceBinder(vertx).setAddress("chkauthaddress");
-                binder.registerLocal(PreAuthService.class, ready.result());
-                startFuture.succeeded();
+                ServiceBinder serviceBinder = new ServiceBinder(vertx).setAddress("gcpreauth");
+                serviceBinder.registerLocal(PreAuthService.class, ready.result());
+                startPromise.complete();
             }
         });
     }
