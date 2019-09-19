@@ -1,5 +1,7 @@
 package com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.database;
 
+import com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.database.services.PreAuthService;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -15,20 +17,16 @@ public class PostgresVerticle extends AbstractVerticle {
     public void start(Future<Void> startFuture) throws Exception {
         sqlClient = PostgreSQLClient.createShared(vertx, new JsonObject().put("host", "ld09245.homedepot.com")
                 .put("database", "postgres").put("username", "postgres").put("password", "cor3services!"));
+        PreAuthService.create(sqlClient, ready ->
 
+        {
+            if (ready.failed()) {
+                startFuture.failed();
+            } else {
+                ServiceBinder binder = new ServiceBinder(vertx).setAddress("chkauthaddress");
+                binder.registerLocal(PreAuthService.class, ready.result());
+                startFuture.succeeded();
+            }
+        });
     }
-
-//    		CheckAuthService.create(sqlClient, ready -> {
-//        if (ready.failed()) {
-//            startFuture.fail(ready.cause());
-//        } else {
-//            ServiceBinder binder = new ServiceBinder(vertx).setAddress("chkauthaddress");
-//            binder.registerLocal(CheckAuthService.class, ready.result());
-//            if(LOGGER.isDebugEnabled()) {
-//                LOGGER.debug("Starting HTTP Verticle");
-//            }
-//            startFuture.complete();
-//        }
-//    });
-
 }
