@@ -43,6 +43,6 @@ public interface PreAuthService {
     }
 
    static PreAuthService createProxy(Vertx vertx, String address) {
-       return null;
+       return new PreAuthServiceVertxEBProxy(vertx, address);
    }
 }

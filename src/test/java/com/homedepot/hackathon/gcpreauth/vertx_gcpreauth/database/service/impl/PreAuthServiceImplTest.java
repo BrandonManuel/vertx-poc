@@ -48,7 +48,7 @@ public class PreAuthServiceImplTest {
                 testContext.completeNow();
             }});
 
-        preAuthServiceImpl.insertPreAuth("123",1d, Timestamp.from(Instant.now()).toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+        PreAuthService preAuthService = preAuthServiceImpl.insertPreAuth("123",1d, Timestamp.from(Instant.now()).toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                 Timestamp.from(Instant.now()).toString(), Timestamp.from(Instant.now()).toString(), Timestamp.from(Instant.now()).toString(), 'y', ready -> {
                     if (ready.failed()) {
                         testContext.failed();
@@ -61,6 +61,9 @@ public class PreAuthServiceImplTest {
                         testContext.completeNow();
                     }
                 });
+
+        Assert.assertNotNull(preAuthService);
+
     }
 
     @Test
