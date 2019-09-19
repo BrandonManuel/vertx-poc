@@ -82,8 +82,9 @@ public class PreAuthServiceImplTest {
         PreAuthService result = preAuthServiceImpl.getPendingBalance("140123044100", ready -> {
             if (ready.failed()) {
                 testContext.failed();
+                testContext.completeNow();
             } else {
-                Assert.assertTrue(Integer.parseInt(ready.result().getString("current_bal")) == 7001);
+                Assert.assertTrue(Integer.parseInt(ready.result().getString("current_bal")) == 7000);
                 System.out.println(ready.result().getString("current_bal"));
                 testContext.completeNow();
             }
