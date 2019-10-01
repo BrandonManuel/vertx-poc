@@ -4,9 +4,9 @@ import java.util.UUID;
 
 public class GiftCard {
     private String cardNumber;
-    private float amount;
-    private UUID uuid;
-    public GiftCard(String cardNumber, float amount, UUID uuid) {
+    private double amount;
+    private String uuid;
+    public GiftCard(String cardNumber, double amount, String uuid) {
         this.cardNumber = cardNumber;
         this.amount = amount;
         this.uuid = uuid;
@@ -16,11 +16,11 @@ public class GiftCard {
         return this.cardNumber;
     }
 
-    public float getAmount() {
+    public double getAmount() {
         return this.amount;
     }
 
-    public UUID getUUID() {
+    public String getUUID() {
         return this.uuid;
     }
 
