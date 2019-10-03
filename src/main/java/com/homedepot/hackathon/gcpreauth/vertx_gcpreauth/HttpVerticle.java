@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 import com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.database.services.PreAuthService;
-import com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.models.GiftCard;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -40,7 +39,6 @@ public class HttpVerticle extends AbstractVerticle {
             final JsonObject body = bodyHandler.toJsonObject();
 
             System.out.println(body);
-            String uuidString;
             String uuid;
             String cardNumber;
             double amount;
@@ -53,47 +51,41 @@ public class HttpVerticle extends AbstractVerticle {
 
                 System.out.println(uuid + ", " + cardNumber + ", " + amount);
 
-                this.service.insertPreAuth(
-                    cardNumber, 
-                    amount,
-                    Timestamp.from(Instant.now()).toString(), 
-                    UUID.randomUUID().toString(), 
-                    uuid, 
-                    Timestamp.from(Instant.now()).toString(), 
-                    Timestamp.from(Instant.now()).toString(), 
-                    Timestamp.from(Instant.now()).toString(), 
-                    'Y', 
-                    insert -> {
-                        if (insert.failed()) {
-                            System.out.println("Insert failed!!!");
-                            System.err.println(insert.cause());
-                        } else {
-                            System.out.println("Insert success!!!");
-                        }
-                });
+                this.service.insertPreAuth(cardNumber, amount, Timestamp.from(Instant.now()).toString(),
+                        UUID.randomUUID().toString(), uuid, Timestamp.from(Instant.now()).toString(),
+                        Timestamp.from(Instant.now()).toString(), Timestamp.from(Instant.now()).toString(), 'Y',
+                        insert -> {
+                            if (insert.failed()) {
+                                System.err.println("Insert failed!!!");
+                                System.err.println(insert.cause());
+                                routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
+                                        .setStatusCode(500).end("{\"status\":\"failure\", \"message\":"
+                                                + insert.cause().getMessage() + "}");
+                            } else {
+                                System.out.println("Insert success!!!");
+                                System.out.println("UUID: " + uuid);
+                                System.out.println("Card number: " + cardNumber);
+                                System.out.println("Amount: " + amount);
+                                routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
+                                        .setStatusCode(200)
+                                        .end("{\"status\":\"success\", \"message\":\"Gift card successfully verified\"}");
+                            }
+                        });
 
             } catch (NullPointerException e) {
-              routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
-                      .setStatusCode(400).end("{\"status\":\"failure\", \"message\":\"Parameter not found\"}");
-              return;
+                routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
+                        .setStatusCode(500).end("{\"status\":\"failure\", \"message\":\"Parameter not found\"}");
+                return;
             } catch (ClassCastException e) {
                 routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
-                    .setStatusCode(400).end("{\"status\":\"failure\", \"message\":\"Parameter not assignable\"}");
+                        .setStatusCode(500).end("{\"status\":\"failure\", \"message\":\"Parameter not assignable\"}");
                 return;
             } catch (IllegalArgumentException e) {
                 routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
-                        .setStatusCode(400).end("{\"status\":\"failure\", \"message\":\"Invalid UUID\"}");
+                        .setStatusCode(500).end("{\"status\":\"failure\", \"message\":\"Invalid UUID\"}");
                 return;
             }
 
-            System.out.println("UUID: " + uuid);
-            System.out.println("Card number: " + cardNumber);
-            System.out.println("Amount: " + amount);
-
-            GiftCard giftCard = new GiftCard(cardNumber, amount, uuid);
-
-            routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
-                    .setStatusCode(200).end("{\"status\":\"success\", \"message\":\"Gift card successfully verified\"}");
         });
 
     }
