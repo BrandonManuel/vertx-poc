@@ -44,7 +44,6 @@ public class HttpVerticle extends AbstractVerticle {
             double amount;
 
             try {
-                // uuidString = body.getString("uuid");
                 uuid = body.getString("uuid");
                 cardNumber = body.getString("gcard_nbr");
                 amount = body.getDouble("amount");
