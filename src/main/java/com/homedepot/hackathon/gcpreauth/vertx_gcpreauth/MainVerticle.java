@@ -14,6 +14,7 @@ public class MainVerticle extends AbstractVerticle {
 
     httpVerticleDeployment.future().setHandler(ar -> {
       if (ar.succeeded()) {
+        System.out.println("HTTP VERTICLE DEPLOYED");
         startPromise.complete();
       } else {
         startPromise.fail(ar.cause());
@@ -22,6 +23,7 @@ public class MainVerticle extends AbstractVerticle {
 
     postgresVerticleDeployment.future().setHandler(postgres -> {
       if(postgres.succeeded()) {
+        System.out.println("POSTGRES VERTICLE DEPLOYED");
         vertx.deployVerticle(HttpVerticle.class,
                 new DeploymentOptions().setInstances(1), httpVerticleDeployment);
       } else {
