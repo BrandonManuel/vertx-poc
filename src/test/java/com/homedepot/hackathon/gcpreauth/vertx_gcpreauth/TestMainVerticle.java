@@ -37,7 +37,7 @@ public class TestMainVerticle {
     testContext.completeNow();
   }
 
-  @Test
+  //@Test
   void testIndexhandler(VertxTestContext testContext) {
     TestSuite suite = TestSuite.create("test_suite");
     suite.test("test_suite", context -> {

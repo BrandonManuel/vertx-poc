@@ -3,7 +3,6 @@ package com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.database;
 import com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.database.services.PreAuthService;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.asyncsql.PostgreSQLClient;
@@ -16,7 +15,7 @@ public class PostgresVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
-        sqlClient = PostgreSQLClient.createShared(vertx, new JsonObject().put("host", "ld09245.homedepot.com")
+        sqlClient = PostgreSQLClient.createShared(vertx, new JsonObject().put("host", "localhost")
                 .put("database", "postgres").put("username", "postgres").put("password", "cor3services!"));
         PreAuthService.create(sqlClient, ready -> {
             if(ready.failed()) {
