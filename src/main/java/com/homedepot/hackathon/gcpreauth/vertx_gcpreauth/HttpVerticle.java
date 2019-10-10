@@ -51,32 +51,57 @@ public class HttpVerticle extends AbstractVerticle {
             String uuid;
             String cardNumber;
             double amount;
-
             try {
                 uuid = body.getString("uuid");
                 cardNumber = body.getString("gcard_nbr");
                 amount = body.getDouble("amount");
 
-                this.service.insertPreAuth(cardNumber, amount, Timestamp.from(Instant.now()).toString(),
-                        UUID.randomUUID().toString(), uuid, Timestamp.from(Instant.now()).toString(),
-                        Timestamp.from(Instant.now()).toString(), Timestamp.from(Instant.now()).toString(), 'Y',
-                        insert -> {
-                            if (insert.failed()) {
-                                System.err.println("Insert failed!!!");
-                                System.err.println(insert.cause());
-                                routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
-                                        .setStatusCode(500).end("{\"status\":\"failure\", \"message\":"
-                                                + insert.cause().getMessage() + "}");
-                            } else {
-                                System.out.println("Insert success!!!");
-                                System.out.println("UUID: " + uuid);
-                                System.out.println("Card number: " + cardNumber);
-                                System.out.println("Amount: " + amount);
-                                routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
-                                        .setStatusCode(200)
-                                        .end("{\"status\":\"success\", \"message\":\"Gift card successfully verified\"}");
-                            }
-                        });
+                // Fetch pending balance
+                // Fetch current balance
+                // if current balance - pending balance > amount else not authorized
+
+                this.service.getCurrentBalance(cardNumber, currentBalanceResult -> {
+                    if (currentBalanceResult.failed()) {
+                        routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
+                                .setStatusCode(503).end("{\"status\":\"failure\", \"message\":\"Unknowd error\"}");
+                        return;
+                    }
+                    final double currentBalance = currentBalanceResult.result().getDouble("BALANCE");
+                    this.service.getPendingBalance(cardNumber, pendingBalanceResult -> {
+                        if (pendingBalanceResult.failed()) {
+                            routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
+                                    .setStatusCode(503).end("{\"status\":\"failure\", \"message\":\"Unknowd error\"}");
+                            return;
+                        }
+                        final double pendingBalance = pendingBalanceResult.result().getDouble("PREAUTH_AMOUNT");
+
+                        if ((currentBalance - pendingBalance) >= amount) {
+                            // Do the insert
+                            this.service.insertPreAuth(cardNumber, amount, Timestamp.from(Instant.now()).toString(),
+                                    UUID.randomUUID().toString(), uuid, Timestamp.from(Instant.now()).toString(),
+                                    Timestamp.from(Instant.now()).toString(), Timestamp.from(Instant.now()).toString(),
+                                    'Y', insert -> {
+                                        if (insert.failed()) {
+                                            routingContext.response()
+                                                    .putHeader("content-type", "application/json; charset=utf-8")
+                                                    .setStatusCode(503).end("{\"status\":\"failure\", \"message\":"
+                                                            + insert.cause().getMessage() + "}");
+                                        } else {
+                                            routingContext.response()
+                                                    .putHeader("content-type", "application/json; charset=utf-8")
+                                                    .setStatusCode(200)
+                                                    .end("{\"status\":\"success\", \"message\":\"Gift card successfully verified\"}");
+                                        }
+                                    });
+                        } else {
+                            routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
+                                    .setStatusCode(503)
+                                    .end("{\"status\":\"failure\", \"message\":\"Unauthorized\"}");
+                            return;
+                        }
+
+                    });
+                });
 
             } catch (NullPointerException e) {
                 routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
