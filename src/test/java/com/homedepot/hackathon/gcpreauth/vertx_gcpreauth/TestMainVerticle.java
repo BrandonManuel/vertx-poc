@@ -53,8 +53,8 @@ public class TestMainVerticle {
 
     JsonObject body = new JsonObject();
     body.put("uuid", UUID.randomUUID().toString());
-    body.put("gcard_nbr", "1234567890");
-    body.put("amount", 30.0);
+    body.put("gcard_nbr", "140123041400");
+    body.put("amount", 1000.0);
     client.post(8080, "localhost", "/preauth").as(BodyCodec.jsonObject()).sendJsonObject(body, response -> {
       if(response.failed()) {
         LOGGER.error("Failed to insert auth", response.cause());

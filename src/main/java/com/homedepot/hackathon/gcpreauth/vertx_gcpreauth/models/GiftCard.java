@@ -1,7 +1,5 @@
 package com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.models;
 
-import java.util.UUID;
-
 public class GiftCard {
     private String cardNumber;
     private double amount;
