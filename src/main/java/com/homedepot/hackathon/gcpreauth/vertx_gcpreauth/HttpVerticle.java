@@ -6,6 +6,9 @@ import java.util.UUID;
 
 import com.homedepot.hackathon.gcpreauth.vertx_gcpreauth.database.services.PreAuthService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
@@ -14,6 +17,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
 public class HttpVerticle extends AbstractVerticle {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpVerticle.class);
 
     private PreAuthService service;
 
@@ -24,7 +28,8 @@ public class HttpVerticle extends AbstractVerticle {
         this.service = PreAuthService.createProxy(vertx, "gcpreauth");
 
         Router router = Router.router(vertx);
-        router.post("/").handler(this::indexHandler);
+        router.get("/").handler(this::indexHandler);
+        router.post("/preauth").handler(this::preauthHandler);
         httpServer.requestHandler(router).listen(8080, http -> {
             if (http.succeeded()) {
                 startPromise.complete();
@@ -35,10 +40,14 @@ public class HttpVerticle extends AbstractVerticle {
     }
 
     private void indexHandler(RoutingContext routingContext) {
+        routingContext.response().end("Preauth Service");
+    }
+
+    private void preauthHandler(RoutingContext routingContext) {
         routingContext.request().bodyHandler(bodyHandler -> {
             final JsonObject body = bodyHandler.toJsonObject();
 
-            System.out.println(body);
+            LOGGER.debug("Received post request with body {}", body);
             String uuid;
             String cardNumber;
             double amount;
@@ -47,8 +56,6 @@ public class HttpVerticle extends AbstractVerticle {
                 uuid = body.getString("uuid");
                 cardNumber = body.getString("gcard_nbr");
                 amount = body.getDouble("amount");
-
-                System.out.println(uuid + ", " + cardNumber + ", " + amount);
 
                 this.service.insertPreAuth(cardNumber, amount, Timestamp.from(Instant.now()).toString(),
                         UUID.randomUUID().toString(), uuid, Timestamp.from(Instant.now()).toString(),
