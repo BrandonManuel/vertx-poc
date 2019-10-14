@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -40,13 +42,12 @@ public class HttpVerticle extends AbstractVerticle {
     }
 
     private void indexHandler(RoutingContext routingContext) {
-        routingContext.response().end("Preauth Service");
+        routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/plain").end("Preauth Service");
     }
 
     private void preauthHandler(RoutingContext routingContext) {
         routingContext.request().bodyHandler(bodyHandler -> {
             final JsonObject body = bodyHandler.toJsonObject();
-
             LOGGER.debug("Received post request with body {}", body);
             String uuid;
             String cardNumber;
@@ -62,15 +63,13 @@ public class HttpVerticle extends AbstractVerticle {
 
                 this.service.getCurrentBalance(cardNumber, currentBalanceResult -> {
                     if (currentBalanceResult.failed()) {
-                        routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
-                                .setStatusCode(503).end("{\"status\":\"failure\", \"message\":\"Unknowd error\"}");
+                        sendErrorResponse(routingContext);
                         return;
                     }
                     final double currentBalance = currentBalanceResult.result().getDouble("BALANCE");
                     this.service.getPendingBalance(cardNumber, pendingBalanceResult -> {
                         if (pendingBalanceResult.failed()) {
-                            routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
-                                    .setStatusCode(503).end("{\"status\":\"failure\", \"message\":\"Unknowd error\"}");
+                            sendErrorResponse(routingContext);
                             return;
                         }
                         final double pendingBalance = pendingBalanceResult.result().getDouble("PREAUTH_AMOUNT");
@@ -82,21 +81,13 @@ public class HttpVerticle extends AbstractVerticle {
                                     Timestamp.from(Instant.now()).toString(), Timestamp.from(Instant.now()).toString(),
                                     'Y', insert -> {
                                         if (insert.failed()) {
-                                            routingContext.response()
-                                                    .putHeader("content-type", "application/json; charset=utf-8")
-                                                    .setStatusCode(503).end("{\"status\":\"failure\", \"message\":"
-                                                            + insert.cause().getMessage() + "}");
+                                            sendErrorResponse(routingContext);
                                         } else {
-                                            routingContext.response()
-                                                    .putHeader("content-type", "application/json; charset=utf-8")
-                                                    .setStatusCode(200)
-                                                    .end("{\"status\":\"success\", \"message\":\"Gift card successfully verified\"}");
+                                            sendSuccessResponse(routingContext);
                                         }
                                     });
                         } else {
-                            routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
-                                    .setStatusCode(503)
-                                    .end("{\"status\":\"failure\", \"message\":\"Unauthorized\"}");
+                            sendErrorResponse(routingContext, "Unauthorized");
                             return;
                         }
 
@@ -104,20 +95,37 @@ public class HttpVerticle extends AbstractVerticle {
                 });
 
             } catch (NullPointerException e) {
-                routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
-                        .setStatusCode(500).end("{\"status\":\"failure\", \"message\":\"Parameter not found\"}");
+                sendErrorResponse(routingContext);
                 return;
             } catch (ClassCastException e) {
-                routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
-                        .setStatusCode(500).end("{\"status\":\"failure\", \"message\":\"Parameter not assignable\"}");
+                sendErrorResponse(routingContext);
                 return;
             } catch (IllegalArgumentException e) {
-                routingContext.response().putHeader("content-type", "application/json; charset=utf-8")
-                        .setStatusCode(500).end("{\"status\":\"failure\", \"message\":\"Invalid UUID\"}");
+                sendErrorResponse(routingContext);
                 return;
             }
 
         });
 
+    }
+
+    private void sendErrorResponse(RoutingContext routingContext) {
+        sendErrorResponse(routingContext, "Unknown error");
+    }
+
+    private void sendSuccessResponse(RoutingContext routingContext) {
+        JsonObject successResponse = new JsonObject().put("status", "success").put("message",
+                "Gift card successfully verified");
+        sendResponse(routingContext, 200, successResponse);
+    }
+
+    private void sendErrorResponse(RoutingContext routingContext, String message) {
+        JsonObject errorResponse = new JsonObject().put("status", "failure").put("message", message);
+        sendResponse(routingContext, 503, errorResponse);
+    }
+
+    private void sendResponse(RoutingContext routingContext, int status, JsonObject jsonObject) {
+        routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                .setStatusCode(status).end(Buffer.buffer(jsonObject.encode()));
     }
 }

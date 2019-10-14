@@ -22,7 +22,7 @@ public class PostgresVerticle extends AbstractVerticle {
         LOGGER.debug("Start verticle");
         try {
             sqlClient = PostgreSQLClient.createShared(vertx, new JsonObject().put("host", "localhost")
-                    .put("database", "postgres").put("username", "postgres").put("password", "cor3services!"));
+                    .put("database", "postgres").put("username", "postgres").put("password", "password"));
             PreAuthService.create(sqlClient, ready -> {
                 if (ready.failed()) {
                     LOGGER.error("Failed to start postgres verticle", ready.cause());

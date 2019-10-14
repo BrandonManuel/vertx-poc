@@ -1,24 +1,35 @@
 package com.homedepot.hackathon.gcpreauth.vertx_gcpreauth;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static io.vertx.junit5.web.TestRequest.bodyResponse;
+import static io.vertx.junit5.web.TestRequest.jsonBodyResponse;
+import static io.vertx.junit5.web.TestRequest.statusCode;
+import static io.vertx.junit5.web.TestRequest.testRequest;
 
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.codec.BodyCodec;
+import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import io.vertx.junit5.web.VertxWebClientExtension;
+import io.vertx.junit5.web.WebClientOptionsInject;
 
-@ExtendWith(VertxExtension.class)
+@ExtendWith({ VertxExtension.class, VertxWebClientExtension.class })
 public class TestMainVerticle {
+  @WebClientOptionsInject
+  public WebClientOptions options = new WebClientOptions().setDefaultHost("localhost").setDefaultPort(8080);
+
   private static final Logger LOGGER = LoggerFactory.getLogger(TestMainVerticle.class);
 
   @BeforeEach
@@ -32,37 +43,23 @@ public class TestMainVerticle {
   }
 
   @Test
-  void testIndexhandler(Vertx vertx, VertxTestContext testContext) {
-    WebClient client = WebClient.create(vertx);
-
+  void testIndexhandler(WebClient client, Vertx vertx, VertxTestContext testContext) {
     LOGGER.debug("Test started");
-
-    client.get(8080, "localhost", "/").as(BodyCodec.string())
-        .send(testContext.succeeding(response -> testContext.verify(() -> {
-          LOGGER.debug("Received response from HTTP Verticle for / {}", response.body());
-          assertTrue(response.body().equalsIgnoreCase("Preauth Service"));
-          testContext.completeNow();
-        })));
+    testRequest(client, HttpMethod.GET, "/")
+        .expect(statusCode(200), bodyResponse(Buffer.buffer("Preauth Service"), "text/plain")).send(testContext);
   }
 
   @Test
-  void testPreAuthhandler(Vertx vertx, VertxTestContext testContext) {
-    WebClient client = WebClient.create(vertx);
+  @RepeatedTest(3)
+  void testPreAuthhandler(WebClient client, Vertx vertx, VertxTestContext testContext) {
 
     LOGGER.debug("Test started");
 
-    JsonObject body = new JsonObject();
-    body.put("uuid", UUID.randomUUID().toString());
-    body.put("gcard_nbr", "140123041400");
-    body.put("amount", 1000.0);
-    client.post(8080, "localhost", "/preauth").as(BodyCodec.jsonObject()).sendJsonObject(body, response -> {
-      if(response.failed()) {
-        LOGGER.error("Failed to insert auth", response.cause());
-        testContext.failNow(response.cause());
-      }
-      LOGGER.debug("Received repsonse {}", response.result().body());  
-      testContext.completeNow();
-    });
-    ;
+    JsonObject requestBody = new JsonObject().put("uuid", UUID.randomUUID().toString()).put("gcard_nbr", "140123041400")
+        .put("amount", 1000.0);
+
+    JsonObject expectedResponse = new JsonObject().put("status", "failure").put("message", "Unknown error");;
+    testRequest(client, HttpMethod.POST, "/preauth").expect(jsonBodyResponse(expectedResponse)).sendJson(requestBody,
+        testContext);
   }
 }
